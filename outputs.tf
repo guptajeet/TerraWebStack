@@ -16,19 +16,34 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
-output "ec2_instance_ids" {
-  description = "IDs of the EC2 instances"
-  value       = module.ec2[*].instance_id
+output "ec2_web_instance_id" {
+  description = "ID of the web EC2 instance"
+  value       = module.ec2_web.instance_id
 }
 
-output "ec2_instance_public_ips" {
+output "ec2_app_instance_id" {
+  description = "ID of the app EC2 instance"
+  value       = module.ec2_app.instance_id
+}
+
+output "ec2_web_instance_public_ips" {
   description = "Public IP address of the EC2 instance"
-  value       = module.ec2[*].instance_public_ip
+  value       = module.ec2_web.instance_public_ip
 }
 
-output "ec2_private_public_ips" {
+output "ec2_app_instance_public_ips" {
+  description = "Public IP address of the EC2 instance"
+  value       = module.ec2_app.instance_public_ip
+}
+
+output "ec2_web_private_public_ips" {
   description = "Private IP address of the EC2 instance"
-  value       = module.ec2[*].instance_private_ip
+  value       = module.ec2_web.instance_private_ip
+}
+
+output "ec2_app_private_public_ips" {
+  description = "Private IP address of the EC2 instance"
+  value       = module.ec2_app.instance_private_ip
 }
 
 #ALB

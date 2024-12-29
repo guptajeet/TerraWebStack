@@ -260,6 +260,6 @@ module "rds" {
 resource "aws_lb_target_group_attachment" "ec2" {
   count = 2
   target_group_arn = module.alb.target_group_arn
-  target_id = module.ec2[count.index].instance_id
+  target_id = module.ec2_app.instance_id
   port = 80
 }
