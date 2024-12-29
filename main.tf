@@ -210,20 +210,38 @@ module "alb" {
 }
 
 # EC2 instances
-module "ec2" {
+
+module "ec2_web" {
   source = "./modules/ec2"
 
-  count                  = 2
   ami                    = var.ec2_ami
   instance_type          = var.ec2_instance_type
-  subnet_id              = aws_subnet.private[count.index].id
+  subnet_id              = aws_subnet.private[0].id
   vpc_security_group_ids = [aws_security_group.ec2.id]
-  user_data              = file("${path.module}/scripts/init.sh")
+  user_data              = file("${path.module}/scripts/init_web.sh")
 
   tags = {
-    Name = "terraform-ec2-${count.index + 1}"
+    Name = "terraform-ec2-web"
+    Role = "web"
   }
 }
+
+module "ec2_app" {
+  source = "./modules/ec2"
+
+  ami                    = var.ec2_ami
+  instance_type          = var.ec2_instance_type
+  subnet_id              = aws_subnet.private[1].id
+  vpc_security_group_ids = [aws_security_group.ec2.id]
+  user_data              = file("${path.module}/scripts/init_app.sh")
+
+  tags = {
+    Name = "terraform-ec2-app"
+    Role = "app"
+  }
+}
+
+
 
 # RDS instance
 
