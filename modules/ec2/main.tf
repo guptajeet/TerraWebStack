@@ -42,7 +42,7 @@ resource "aws_instance" "main" {
 
   iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
 
-  user_data = base64encode(var.user_data)
+  user_data = base64encode(var.user_data)  #added later
 
   tags = var.tags
 
@@ -51,8 +51,8 @@ resource "aws_instance" "main" {
     volume_type = "gp2"
   }
 
-  associate_public_ip_address = true
-  user_data_replace_on_change = true
+  associate_public_ip_address = true   #added later
+  user_data_replace_on_change = true   #added later
 }
 
 resource "aws_eip" "main" {

@@ -208,6 +208,7 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+# added later
 resource "aws_security_group_rule" "ec2_allow_ssh" {
   type              = "ingress"
   from_port         = 22
