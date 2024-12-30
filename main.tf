@@ -1,6 +1,41 @@
 resource "aws_s3_bucket" "terraform-state-bucket" {
   bucket = "terraform-state-bucket-123456"
 }
+/*
+# bastion host
+resource "aws_instance" "bastion" {
+  ami           = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 AMI ID
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public[0].id  # Use the first public subnet
+  key_name      = "your-key-pair-name"
+  vpc_security_group_ids = [aws_security_group.bastion.id]
+  
+  tags = {
+    Name = "Bastion Host"
+  }
+}
+
+resource "aws_security_group" "bastion" {
+  name        = "bastion-sg"
+  description = "Security group for bastion host"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["YOUR_IP_ADDRESS/32"]  # Replace with your IP address
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+*/
 
 # VPC Creation
 
@@ -172,7 +207,16 @@ resource "aws_security_group" "ec2" {
     Name = "terraform-ec2-sg"
   }
 }
-
+/*
+resource "aws_security_group_rule" "allow_ssh_from_bastion" {
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.ec2.id
+}
+*/
 # Security group for RDS
 
 resource "aws_security_group" "rds" {
@@ -209,11 +253,14 @@ module "alb" {
   security_groups = [aws_security_group.alb.id]
 }
 
+
 # EC2 instances
 
 module "ec2_web" {
   source = "./modules/ec2"
 
+  ssm_role_name = "SSMRoleForWebEC2"
+  instance_profile_name = "WebSSMInstanceProfile"
   ami                    = var.ec2_ami
   instance_type          = var.ec2_instance_type
   subnet_id              = aws_subnet.private[0].id
@@ -229,6 +276,8 @@ module "ec2_web" {
 module "ec2_app" {
   source = "./modules/ec2"
 
+  ssm_role_name = "SSMRoleForAppEC2"
+  instance_profile_name = "AppSSMInstanceProfile"
   ami                    = var.ec2_ami
   instance_type          = var.ec2_instance_type
   subnet_id              = aws_subnet.private[1].id

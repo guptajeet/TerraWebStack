@@ -29,3 +29,13 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "ssm_role_name" {
+  description = "Name for the SSM IAM role"
+  type        = string
+}
+
+variable "instance_profile_name" {
+  description = "Name for the IAM Instance Profile"
+  type        = string
+}
