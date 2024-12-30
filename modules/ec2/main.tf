@@ -33,14 +33,16 @@ resource "aws_iam_instance_profile" "ssm_profile" {
 
 
 resource "aws_instance" "main" {
-  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
-  ami = var.ami
-  instance_type = var.instance_type
-  subnet_id = var.subnet_id
+  
+  ami                  = var.ami
+  instance_type        = var.instance_type
+  subnet_id            = var.subnet_id
 
   vpc_security_group_ids = var.vpc_security_group_ids
 
-  user_data = var.user_data
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
+
+  user_data = base64encode(var.user_data)
 
   tags = var.tags
 
@@ -48,14 +50,17 @@ resource "aws_instance" "main" {
     volume_size = 8
     volume_type = "gp2"
   }
+
+  associate_public_ip_address = true
+  user_data_replace_on_change = true
 }
 
 resource "aws_eip" "main" {
-  domain = "vpc"
+  domain   = "vpc"
   instance = aws_instance.main.id
 }
 
 resource "aws_eip_association" "main" {
-  instance_id = aws_instance.main.id
+  instance_id   = aws_instance.main.id
   allocation_id = aws_eip.main.id
 }

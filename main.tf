@@ -207,6 +207,15 @@ resource "aws_security_group" "ec2" {
     Name = "terraform-ec2-sg"
   }
 }
+
+resource "aws_security_group_rule" "ec2_allow_ssh" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"] # Consider restricting this to your IP address
+  security_group_id = aws_security_group.ec2.id
+}
 /*
 resource "aws_security_group_rule" "allow_ssh_from_bastion" {
   type                     = "ingress"
@@ -259,11 +268,12 @@ module "alb" {
 module "ec2_web" {
   source = "./modules/ec2"
 
-  ssm_role_name = "SSMRoleForWebEC2"
+  ssm_role_name         = "SSMRoleForWebEC2"
   instance_profile_name = "WebSSMInstanceProfile"
-  ami                    = var.ec2_ami
-  instance_type          = var.ec2_instance_type
-  subnet_id              = aws_subnet.private[0].id
+  ami                   = var.ec2_ami
+  instance_type         = var.ec2_instance_type
+  #subnet_id              = aws_subnet.private[0].id
+  subnet_id              = aws_subnet.public[1].id
   vpc_security_group_ids = [aws_security_group.ec2.id]
   user_data              = file("${path.module}/scripts/init_web.sh")
 
@@ -276,11 +286,12 @@ module "ec2_web" {
 module "ec2_app" {
   source = "./modules/ec2"
 
-  ssm_role_name = "SSMRoleForAppEC2"
+  ssm_role_name         = "SSMRoleForAppEC2"
   instance_profile_name = "AppSSMInstanceProfile"
-  ami                    = var.ec2_ami
-  instance_type          = var.ec2_instance_type
-  subnet_id              = aws_subnet.private[1].id
+  ami                   = var.ec2_ami
+  instance_type         = var.ec2_instance_type
+  #subnet_id              = aws_subnet.private[1].id
+  subnet_id              = aws_subnet.public[0].id
   vpc_security_group_ids = [aws_security_group.ec2.id]
   user_data              = file("${path.module}/scripts/init_app.sh")
 
@@ -307,8 +318,8 @@ module "rds" {
 # Register EC2 instance with ALB target group
 
 resource "aws_lb_target_group_attachment" "ec2" {
-  count = 2
+  count            = 2
   target_group_arn = module.alb.target_group_arn
-  target_id = module.ec2_app.instance_id
-  port = 80
+  target_id        = module.ec2_app.instance_id
+  port             = 80
 }
